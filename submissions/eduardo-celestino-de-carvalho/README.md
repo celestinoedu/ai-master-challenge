@@ -3,7 +3,7 @@
 ## Sobre mim
 
 - **Nome:** Eduardo Celestino de Carvalho
-- **LinkedIn:** a informar
+- **LinkedIn:** [linkedin.com/in/educcarvalho](https://www.linkedin.com/in/educcarvalho/)
 - **Challenge escolhido:** 003 — Lead Scorer (entregue como **Lead Kanban**)
 
 ---
