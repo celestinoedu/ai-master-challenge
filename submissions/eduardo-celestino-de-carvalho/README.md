@@ -60,6 +60,8 @@ Cada cartão mostra o motivo da posição, a fase (Início, Em andamento, Perto 
 
 Os filtros por regional, manager e vendedor ficam fixos na barra superior e valem para as duas telas. Pipeline e Dashboard exportam CSV. A interface também funciona no [celular](process-log/screenshots/06-celular.png).
 
+**Tutorial em vídeo para quem não é da área:** 2 minutos em motion design, com narração e legendas, dentro do próprio app (botão **?** e guia rápido). [Assistir](solution/web/media/tutorial.mp4) · [como foi feito](video/README.md).
+
 ### Recomendações
 
 1. **Revisar primeiro "Confirmar ou encerrar".** São 1.291 negócios e 3,2 mi em valor potencial que distorcem a previsão. Os rankings do Dashboard mostram quem cobrar.
@@ -97,6 +99,7 @@ Na primeira execução, o dataset público é baixado do Kaggle e verificado. Te
 | Codex / ChatGPT | Ler o brief, planejar, auditar os dados (G1), rodar o experimento preditivo (G2) e construir a primeira fila em Streamlit (G3). |
 | Claude Code | Fazer a análise crítica da primeira regra, desenhar e rodar o backtest, reescrever a regra e construir o Lead Kanban (Pipeline, Dashboard e procedimento). |
 | Playwright | Revisar cada versão da interface em navegador real, no desktop e no celular, e gerar as capturas. |
+| Remotion + Edge TTS | Montar o vídeo tutorial em motion design sobre telas reais do app, com narração neural e legendas. |
 
 ### Workflow
 
@@ -113,6 +116,7 @@ Na primeira execução, o dataset público é baixado do Kaggle e verificado. Te
 
    [Log](process-log/2026-10-15-g3-producao.md) · [Log](process-log/2026-10-15-g3-ux.md).
 8. **Revisão de entrega.** Avaliação crítica contra o guia de submissão, testes de robustez, remoção da interface duplicada e teste em clone limpo. [Log](process-log/2026-10-15-entrega.md).
+9. **Comparação com as outras submissões e evidências.** Li os 86 PRs do case e as reviews públicas do avaliador. Decidimos incluir os exports das conversas e um vídeo tutorial para usuários não técnicos. [Log](process-log/2026-10-15-concorrencia-e-tutorial.md).
 
 ### Onde a IA errou e como corrigi
 
@@ -141,7 +145,7 @@ Na primeira execução, o dataset público é baixado do Kaggle e verificado. Te
 - [x] Capturas da solução funcionando em [process-log/screenshots/](process-log/screenshots/)
 - [x] Histórico de commits nesta branch
 - [x] Experimentos reproduzíveis: [backtest da regra](solution/experiments/g3-focus-backtest.json) e [G2](solution/experiments/g2-results.json)
-- [ ] Chat exports
+- [x] Chat exports das duas sessões (Codex e Claude Code), com ações da IA e redação de dados privados, em [process-log/chat-exports/](process-log/chat-exports/README.md)
 
 ---
 
