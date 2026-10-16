@@ -4,6 +4,7 @@ Registro cronológico de decisões, prompts relevantes, respostas da IA, verific
 
 ## Registros
 
+- **Exports das conversas com IA:** [Codex](conversa-exportada-2026-10-15.md) e [Claude Code](chat-exports/2026-10-15-claude-code-g3-a-entrega.md) · [como foram preparados](chat-exports/README.md)
 - [15/10/2026 — escolha do desafio e hipótese preditiva](2026-10-15-descoberta.md)
 - [15/10/2026 — tradução do brief em critérios e plano](2026-10-15-brief-e-planejamento.md)
 - [15/10/2026 — G1: carga e qualidade dos dados](2026-10-15-g1-dados.md)
@@ -13,6 +14,7 @@ Registro cronológico de decisões, prompts relevantes, respostas da IA, verific
 - [15/10/2026 — Lead Kanban: interface de produção, Dashboard e procedimento](2026-10-15-g3-producao.md)
 - [15/10/2026 — Lead Kanban: revisão de UX e linguagem simples](2026-10-15-g3-ux.md)
 - [15/10/2026 — Revisão de entrega: avaliação crítica, robustez e teste em clone limpo](2026-10-15-entrega.md)
+- [15/10/2026 — Comparação com as outras submissões, exports e vídeo tutorial](2026-10-15-concorrencia-e-tutorial.md)
 
 Capturas da solução funcionando: [screenshots/](screenshots/).
 
