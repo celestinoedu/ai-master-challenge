@@ -93,12 +93,27 @@ function bind() {
   bindHelp();
 }
 
+/* Servidor Python (api/board) ou demo estática (data/board.json, gerado por build_static.py).
+   Caminhos relativos: a demo pública roda numa subpasta. */
+async function loadBoard() {
+  let lastError;
+  const isStatic = document.querySelector('meta[name="lead-kanban-static"]');
+  for (const url of isStatic ? ["data/board.json"] : ["api/board", "data/board.json"]) {
+    try {
+      const response = await fetch(url);
+      if (response.ok) return await response.json();
+      lastError = new Error(`HTTP ${response.status}`);
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError;
+}
+
 async function init() {
   bind();
   try {
-    const response = await fetch("/api/board");
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    state.data = await response.json();
+    state.data = await loadBoard();
   } catch (err) {
     $("board").innerHTML = `<div class="board-error">Não foi possível carregar as oportunidades (${esc(err.message)}). Verifique se o servidor está em execução.</div>`;
     return;

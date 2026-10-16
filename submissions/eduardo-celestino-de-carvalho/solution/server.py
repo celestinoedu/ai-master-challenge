@@ -29,6 +29,11 @@ BACKTEST = ROOT / "experiments" / "g3-focus-backtest.json"
 
 
 def load_payload() -> bytes:
+    return gzip.compress(json.dumps(board_payload(), ensure_ascii=False).encode("utf-8"))
+
+
+def board_payload() -> dict:
+    """Payload da interface: carteira, referências e o resumo do backtest, se gerado."""
     archive = download_archive(ROOT / "data" / ARCHIVE_NAME)
     board = build_board(load_dataset(archive))
     # Resultado agregado do backtest, se gerado, para o dashboard e o procedimento.
@@ -38,7 +43,8 @@ def load_payload() -> bytes:
                               "cleanup": c["lanes"]["encerrar"],
                               "phases": c["focus_outcome_by_phase"]} for c in result["cutoffs"]]
         board["robustness"] = result.get("robustness_summary")
-    return gzip.compress(json.dumps(board, ensure_ascii=False).encode("utf-8"))
+        board["decomposition"] = result.get("decomposition")
+    return board
 
 
 def byte_range(header: str | None, size: int) -> tuple[int, int] | None:
