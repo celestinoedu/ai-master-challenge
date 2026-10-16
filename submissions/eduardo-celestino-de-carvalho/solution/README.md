@@ -9,6 +9,16 @@ O Lead Kanban é uma aplicação web local ([server.py](server.py) + [web/](web/
 - **Payload da interface:** [leadscore/board.py](leadscore/board.py).
 - **Experimento do G2:** [experiment_model.py](experiment_model.py), [documentado aqui](../docs/07-g2-modelagem.md). A regressão logística não alimenta o sistema.
 
+## Demo pública
+
+[celestinoedu.github.io/ai-master-challenge](https://celestinoedu.github.io/ai-master-challenge/) é a mesma interface, servida como arquivos estáticos. Para gerá-la:
+
+```powershell
+python build_static.py --out dist   # web/ + data/board.json, sem servidor
+```
+
+Sem o servidor Python, o app lê `data/board.json`, o mesmo payload de `/api/board`.
+
 ## Rodar o Lead Kanban
 
 Pré-requisito: **Python 3.11+**, sem bibliotecas externas, e acesso à internet na primeira execução para baixar o dataset auditado. A partir da pasta `solution/`:
@@ -101,6 +111,8 @@ python evaluate_focus.py --output experiments/g3-focus-backtest.json
 
 Em cinco fins de mês de 2017, o script reconstrói os negócios em `Engaging`, usando só os fechamentos conhecidos até cada corte. Depois compara as regras pelos ganhos e pela receita nos 5 primeiros negócios de cada vendedor. O Lead Kanban somou **326 ganhos e 2,09 mi de receita**, contra **275 e 1,76 mi** do método óbvio de ordenar só pelo valor. O JSON também guarda, como registro do processo, a primeira regra do G3 e uma variante descartada. Nenhum dos 1.443 casos com prazo excedido fechou depois.
 
+O ganho vem da idade do negócio: tirar os parados da fila (1,76 → 1,90 mi) e, no empate de valor, preferir os mais novos (→ 2,09 mi). Em `decomposition`, o JSON traz essas variantes e um bootstrap pareado: +18,5% sobre "só valor", com IC 95% de +12% a +25%.
+
 O mesmo JSON traz dois controles de robustez (`robustness_summary`):
 - **Desempate refeito com as 3 primeiras datas e conferido nas 2 últimas.** "Mais recente primeiro" vence nas duas partes; nas 2 últimas, com 670 mil, contra 502 mil do mais antigo primeiro e 493 mil de ordenar só pelo valor. As datas já tinham sido vistas, então isso não equivale a uma validação independente.
 - **Prazo por percentil (p99, p95, p90) em vez do máximo.** A receita da fila quase não muda, mas 9, 35 e 86 vendas que ainda iam fechar cairiam em "Confirmar ou encerrar". Com o máximo, nenhuma.
@@ -113,6 +125,6 @@ O resultado continua exploratório; as ressalvas estão no [doc da revisão](../
 python -m unittest discover -s tests -v
 ```
 
-São 29 testes: carga e auditoria, regra das colunas e da ordem, payload da interface, ausência de vazamento no backtest e intervalos de bytes do vídeo tutorial. Os testes do modelo exigem scikit-learn e são pulados sem ele.
+São 31 testes: carga e auditoria, regra das colunas e da ordem, payload da interface, ausência de vazamento e bootstrap do backtest, e intervalos de bytes do vídeo tutorial. Os testes do modelo exigem scikit-learn e são pulados sem ele.
 
 Os arquivos brutos, ambientes locais e credenciais não entram no Pull Request; o download do dataset público é reproduzível e a fonte está creditada. A versão roda localmente sobre dados do CRM até 31/12/2017, sem conexão com um CRM ativo.

@@ -15,6 +15,7 @@ Registro cronológico de decisões, prompts relevantes, respostas da IA, verific
 - [15/10/2026 — Lead Kanban: revisão de UX e linguagem simples](2026-10-15-g3-ux.md)
 - [15/10/2026 — Revisão de entrega: avaliação crítica, robustez e teste em clone limpo](2026-10-15-entrega.md)
 - [15/10/2026 — Comparação com as outras submissões, exports e vídeo tutorial](2026-10-15-concorrencia-e-tutorial.md)
+- [15/10/2026 — Origem dos +19% e demo pública](2026-10-15-ganho-e-demo.md)
 
 Capturas da solução funcionando: [screenshots/](screenshots/).
 

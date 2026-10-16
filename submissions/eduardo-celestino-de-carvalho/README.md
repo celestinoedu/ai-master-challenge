@@ -10,7 +10,9 @@
 
 ## Executive Summary
 
-Construí o **Lead Kanban**, uma aplicação web que organiza as 2.089 oportunidades abertas do CRM em três colunas de ação (**Negociar**, **Qualificar** e **Confirmar ou encerrar**) e explica cada posição. Produto, setor e vendedor quase não separam ganhos de perdas: um modelo preditivo teve AUC 0,513. O que separa é o tempo: nenhum dos 6.711 negócios concluídos fechou depois de **138 dias** em negociação, e **81%** dos que estão em negociação hoje já passaram desse prazo. Num teste com dados passados, os 5 primeiros negócios de cada vendedor renderam **2,09 mi** de receita, contra **1,76 mi** ao ordenar só pelo valor (+19%). A recomendação é revisar primeiro os 1.291 negócios parados (3,2 mi, 64% do valor do pipeline) e usar a coluna Negociar como agenda da semana, com um piloto em parte do time.
+Construí o **Lead Kanban**, uma aplicação web que organiza as 2.089 oportunidades abertas do CRM em três colunas de ação (**Negociar**, **Qualificar** e **Confirmar ou encerrar**) e explica cada posição. Produto, setor e vendedor quase não separam ganhos de perdas: um modelo preditivo teve AUC 0,513. O que separa é o tempo: nenhum dos 6.711 negócios concluídos fechou depois de **138 dias** em negociação, e **81%** dos que estão em negociação hoje já passaram desse prazo. Num teste com dados passados, os 5 primeiros negócios de cada vendedor renderam **2,09 mi** de receita, contra **1,76 mi** ao ordenar só pelo valor (+19%, com margem provável de +12% a +25%). A recomendação é revisar primeiro os 1.291 negócios parados (3,2 mi, 64% do valor do pipeline) e usar a coluna Negociar como agenda da semana, com um piloto em parte do time.
+
+**[Abrir a demo pública](https://celestinoedu.github.io/ai-master-challenge/)** · [vídeo tutorial de 2 min](solution/web/media/tutorial.mp4)
 
 ![Pipeline do Lead Kanban](process-log/screenshots/01-pipeline.png)
 
@@ -44,8 +46,12 @@ Cada cartão mostra o motivo da posição, a fase (Início, Em andamento, Perto 
 | Método | Vendas ganhas | Receita | Escolhas paradas |
 |---|---:|---:|---:|
 | Ordenar só pelo valor | 275 | 1,76 mi | 91 |
+| Valor, sem os parados (sem olhar a idade) | 299 | 1,90 mi | 0 |
+| Valor e mais novo primeiro, com os parados | 320 | 2,06 mi | 31 |
 | **Lead Kanban** | **326** | **2,09 mi** | **0** |
 
+- **De onde vem o ganho:** da idade do negócio, em duas partes. Tirar os parados da fila explica cerca de 4 em cada 10 reais a mais; no empate de valor, começar pelo mais novo explica os outros 6.
+- **Margem:** bootstrap pareado sobre 150 pares vendedor × data, com 5.000 reamostras. O ganho sobre "só valor" fica entre +12% e +25% (IC 95%). Ordenar por valor e idade sem colunas chega perto (+0,4% a +2,5% a favor da regra), mas deixa 31 negócios parados entre os escolhidos. As colunas tiram esses negócios da agenda e dizem o que fazer com eles.
 - Dos 1.443 negócios que já tinham passado do prazo nas datas de teste, **nenhum fechou depois**.
 - **Desempate conferido por partes:** refeita só com as 3 primeiras datas, a escolha de "mais recente primeiro" seria a mesma. Nas 2 últimas, ele também vence, com 670 mil de receita contra 502 mil do "mais antigo primeiro" e 493 mil de ordenar só pelo valor.
 - **Prazo:** usar o percentil 95 ou 90 em vez do máximo quase não muda a receita da fila. Mas 35 e 86 vendas que ainda iam fechar, respectivamente, cairiam em "Confirmar ou encerrar". Com o máximo, nenhuma.
@@ -86,6 +92,8 @@ Com **Python 3.11+** e sem bibliotecas externas, a partir de `solution/`:
 python server.py --open        # http://localhost:8000
 ```
 
+**Demo pública, sem instalar nada:** [celestinoedu.github.io/ai-master-challenge](https://celestinoedu.github.io/ai-master-challenge/). É a mesma interface com os dados já processados, gerada por `python build_static.py`.
+
 Na primeira execução, o dataset público é baixado do Kaggle e verificado. Testes: `python -m unittest discover -s tests`. Demonstração, arquitetura e reprodução dos experimentos estão em [solution/README.md](solution/README.md).
 
 ---
@@ -117,6 +125,7 @@ Na primeira execução, o dataset público é baixado do Kaggle e verificado. Te
    [Log](process-log/2026-10-15-g3-producao.md) · [Log](process-log/2026-10-15-g3-ux.md).
 8. **Revisão de entrega.** Avaliação crítica contra o guia de submissão, testes de robustez, remoção da interface duplicada e teste em clone limpo. [Log](process-log/2026-10-15-entrega.md).
 9. **Comparação com as outras submissões e evidências.** Li os 86 PRs do case e as reviews públicas do avaliador. Decidimos incluir os exports das conversas e um vídeo tutorial para usuários não técnicos. [Log](process-log/2026-10-15-concorrencia-e-tutorial.md).
+10. **Avaliação como avaliador e correções.** Pedi uma leitura crítica do PR já aberto. A decomposição dos +19% corrigiu a explicação do ganho, e a demo pública passou a dispensar instalação. [Log](process-log/2026-10-15-ganho-e-demo.md).
 
 ### Onde a IA errou e como corrigi
 
@@ -129,6 +138,7 @@ Na primeira execução, o dataset público é baixado do Kaggle e verificado. Te
   - o navegador servia versões antigas da página.
 
   Todos foram encontrados na revisão em navegador e corrigidos.
+- **Explicação incompleta do ganho:** a IA atribuiu os +19% só a "não reservar escolhas para parados". A decomposição mostrou que isso explica cerca de 40% do ganho; o resto vem de preferir os mais novos. Na mesma revisão, a IA também errou na direção oposta: usou o desempate "mais antigo primeiro" como se fosse neutro e concluiu que tirar os parados não ajudava. Os dois erros foram corrigidos com variantes neutras e bootstrap.
 - **Exagero no texto:** a IA chamou de "validação fora da amostra" uma separação de datas que já tinham sido vistas. Na revisão, o termo virou "conferência por partes", e o JSON foi renomeado para não prometer o que o teste não mostra.
 - **Export das conversas:** a primeira versão da redação deixou passar variações em maiúsculas de nomes privados e não trazia as mensagens enviadas durante a execução. A busca no texto final apontou as duas falhas, e o export foi refeito.
 

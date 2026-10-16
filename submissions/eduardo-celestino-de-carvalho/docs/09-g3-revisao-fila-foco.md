@@ -78,7 +78,7 @@ As vagas ocupadas por negócios com prazo excedido somaram **190** na regra ante
 
 1. **A coluna Confirmar ou encerrar é a evidência mais forte.** Dos 1.443 casos que já tinham prazo excedido nas datas de corte, **nenhum fechou depois**, nem como ganho nem como perda.
 2. **A regra anterior foi pior que ordenar só por valor.** Ela teve 180 ganhos esperados contra 275, porque reservava vagas para negócios travados.
-3. **A regra atual superou o baseline de valor em receita em todos os cortes**, com cerca de 19% a mais de ganhos e de receita no total.
+3. **A regra atual superou o baseline de valor em receita em todos os cortes**, com cerca de 19% a mais de ganhos e de receita no total (IC 95% de +12% a +25%; ver "De onde vem o ganho").
 4. **A ordem por idade vem deste número.** Os ganhos até o fim dos dados foram de **45%** na fase Início, **39%** em Em andamento, **19%** em Perto do limite e **0%** com prazo excedido. Por isso, no empate de valor, o mais recente vem primeiro, e acima do prazo máximo o negócio sai da negociação. O Dashboard mostra esse gráfico.
 5. **A taxa de ganho por idade foi descartada.** Entre negócios concluídos, ela sobe com a idade (de 63% para 76% após 120 dias), mas ignora quem trava. Multiplicar o valor por essa taxa não melhorou a fila.
 
@@ -104,6 +104,29 @@ Dois pontos da regra podiam ter sido ajustados aos dados. Por isso foram testado
 | Percentil 90 | ~104 | 2,10 mi | 2.202 | 86 |
 
 O resultado da fila não depende do prazo exato: a receita varia menos de 1%. O que muda é o custo de errar. Um prazo menor mandaria para "Confirmar ou encerrar" vendas que ainda iam fechar. O máximo é a escolha conservadora: não marcou como parado nenhum negócio que viria a ser ganho.
+
+### De onde vem o ganho
+
+Para separar os dois usos da idade, o backtest inclui duas variantes intermediárias. Os totais são das 750 vagas do top 5, em 5 datas.
+
+| Variante | Receita | Vagas com parados |
+|---|---:|---:|
+| Só valor potencial | 1,76 mi | 91 |
+| Colunas e valor, sem desempate por idade | 1,90 mi | 0 |
+| Valor e mais novo primeiro, sem colunas | 2,06 mi | 31 |
+| **Regra atual** (colunas e mais novo primeiro) | **2,09 mi** | **0** |
+
+- **Tirar os parados explica cerca de 40% do ganho; preferir os mais novos, o restante.** A explicação anterior ("não reservar vagas para parados") cobria só a primeira parte.
+- **O desempate "mais antigo primeiro" não é neutro.** Ele escolhe os negócios perto do limite, que fecham menos. Por isso rende 1,74 mi, abaixo da variante sem desempate, e não serve como medida isolada do efeito de tirar os parados.
+- **Bootstrap pareado** (150 pares vendedor × data, 5.000 reamostras, semente fixa):
+
+  | Comparação | Ganho | IC 95% |
+  |---|---:|---:|
+  | Regra × só valor | +18,5% | +12,4% a +25,4% |
+  | Regra × colunas sem desempate | +10,2% | +5,5% a +15,4% |
+  | Regra × valor e idade sem colunas | +1,3% | +0,4% a +2,5% |
+
+  O sinal é a idade. As colunas acrescentam pouco em receita sobre ordenar por valor e idade, mas tiram os 31 parados da agenda e dão a eles uma ação própria.
 
 **Ressalva metodológica.** O backtest é **exploratório**:
 - duas escolhas foram feitas depois de olhar os resultados: retirar a taxa por idade e desempatar pelo negócio mais recente. A segunda se mantém na conferência acima;
