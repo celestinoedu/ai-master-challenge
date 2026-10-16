@@ -41,6 +41,8 @@ Construí o **Lead Kanban**, uma aplicação web que organiza as 2.089 oportunid
 
 Cada cartão mostra o motivo da posição, a fase (Início, Em andamento, Perto do limite) e as ações sugeridas. Conta ausente gera uma tarefa de cadastro e não altera a ordem.
 
+**Por que não um score de 0 a 100:** aqui, o score é a coluna mais a posição dentro dela ("#1 de 298 em Negociar"). Um número como 85 seria lido como chance de fechar, e os dados não sustentam isso: o modelo de probabilidade teve AUC 0,513. Coluna, posição e motivo dizem ao vendedor o que fazer, sem prometer uma precisão que não existe.
+
 **O teste** (top 5 por vendedor, 750 escolhas em 5 datas, desfecho observado até 31/12/2017):
 
 | Método | Vendas ganhas | Receita | Escolhas paradas |
@@ -81,6 +83,13 @@ Os filtros por regional, manager e vendedor ficam fixos na barra superior e vale
 - **Qualificar** é ordenada só pelo valor: a prospecção não tem data nem outro sinal útil nos dados.
 - O backtest é exploratório: duas escolhas foram feitas depois de ver dados, e os cortes se sobrepõem. Ele descarta ideias ruins, mas não promete ganho em operação.
 - O sistema é somente leitura; as ações marcadas ficam no navegador.
+
+**O que precisaria para escalar:**
+1. **Integração com o CRM:** leitura diária automática no lugar do arquivo de 2017 e escrita das ações e mudanças de etapa, para que "Confirmar ou encerrar" atualize o pipeline de verdade.
+2. **Dado de atividade:** último contato, reuniões e propostas. Com isso, "parado" passa a ser dias sem interação, e a coluna Qualificar ganha um sinal além do preço.
+3. **Prazo recalculado periodicamente**, por produto se a diferença justificar, e monitorado com o percentil 95 ao lado do máximo.
+4. **Login e perfis:** o vendedor vê a própria carteira e o gestor vê o time. As ações marcadas passam a ser salvas no servidor, e não no navegador.
+5. **Piloto com grupo de controle** antes do rollout, medindo ciclo, taxa de resolução e receita.
 
 ---
 
