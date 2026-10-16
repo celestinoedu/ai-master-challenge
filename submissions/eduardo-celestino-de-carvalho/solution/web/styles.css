@@ -457,3 +457,11 @@ button { cursor: pointer; }
   .help-toc { display: none; }
   .help-content { padding: 4px 16px 32px; }
 }
+
+/* Tutorial em vídeo (primeira seção do procedimento) */
+.tutorial-video { margin: 0; }
+.tutorial-video video {
+  display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 12px;
+  background: #031a26; box-shadow: 0 10px 30px rgba(3, 26, 38, .18);
+}
+.tutorial-video figcaption { margin-top: 10px; font-size: 13px; color: var(--ink-2); }

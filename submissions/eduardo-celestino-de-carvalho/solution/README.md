@@ -113,6 +113,6 @@ O resultado continua exploratório; as ressalvas estão no [doc da revisão](../
 python -m unittest discover -s tests -v
 ```
 
-São 26 testes: carga e auditoria, regra das colunas e da ordem, payload da interface e ausência de vazamento no backtest. Os testes do modelo exigem scikit-learn e são pulados sem ele.
+São 29 testes: carga e auditoria, regra das colunas e da ordem, payload da interface, ausência de vazamento no backtest e intervalos de bytes do vídeo tutorial. Os testes do modelo exigem scikit-learn e são pulados sem ele.
 
 Os arquivos brutos, ambientes locais e credenciais não entram no Pull Request; o download do dataset público é reproduzível e a fonte está creditada. A versão roda localmente sobre dados do CRM até 31/12/2017, sem conexão com um CRM ativo.

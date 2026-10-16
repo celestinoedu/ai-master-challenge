@@ -6,6 +6,7 @@ import { state } from "./state.js";
 
 const ACCOUNT_STEP = "Identificar e registrar a conta relacionada";
 const SECTIONS = [
+  ["tutorial", "Tutorial em vídeo"],
   ["visao", "Visão geral"],
   ["classificacao", "Classificação"],
   ["prazos", "Régua de prazos"],
@@ -22,6 +23,19 @@ const VARIANTS = [
   ["price_only_no_lanes", "Ordenar só pelo valor potencial"],
   ["focus_rule", "Lead Kanban"],
 ];
+
+/* Vídeo de 2 minutos para quem não é da área: narração, legendas e o app real em movimento. */
+function tutorial() {
+  return `
+    <figure class="tutorial-video">
+      <video id="tutorial-player" controls preload="metadata" playsinline poster="media/tutorial-capa.jpg">
+        <source src="media/tutorial.mp4" type="video/mp4">
+        <track kind="captions" srclang="pt-BR" label="Português" src="media/tutorial.vtt" default>
+        Seu navegador não reproduz vídeo. As regras completas estão nas seções abaixo.
+      </video>
+      <figcaption>2 minutos: as três colunas, a ordem dos cartões, o detalhe, os filtros e o Dashboard. Legendas ativadas; dá para desligá-las no menu do player.</figcaption>
+    </figure>`;
+}
 
 function sampleFor(phase) {
   const item = state.data.items.find((i) => i.phase === phase);
@@ -200,7 +214,8 @@ function evidence() {
 /* Controles de robustez do teste: desempate validado fora da seleção e prazos menores. */
 function robustness() {
   const r = state.data.robustness;
-  if (!r) return "";
+  // JSON do backtest de outra versão: o procedimento abre sem este bloco, em vez de falhar inteiro.
+  if (!r?.tie_break?.last_cutoffs || !r.threshold?.p95 || !r.price_only?.last_cutoffs) return "";
   const tie = r.tie_break.last_cutoffs, p95 = r.threshold.p95, p90 = r.threshold.p90;
   return `
     <ul class="checks">
@@ -235,14 +250,14 @@ function limits() {
 
 export function renderHelp() {
   const body = {
-    visao: overview(), classificacao: flow(), prazos: ruler(), acoes: actions(), ordem: ordering(),
+    tutorial: tutorial(), visao: overview(), classificacao: flow(), prazos: ruler(), acoes: actions(), ordem: ordering(),
     dashboard: indicators(), funcionalidades: features(), evidencia: evidence(), glossario: glossary(), limites: limits(),
   };
   document.getElementById("help-content").innerHTML = `
     <header class="modal-head help-head">
       <div class="modal-head-main">
         <p class="kicker">Lead Kanban</p>
-        <h2 id="help-title">Procedimento e regras do sistema</h2>
+        <h2 id="help-title">Tutorial de uso e regras do sistema</h2>
       </div>
       <button class="icon-btn" type="button" data-close aria-label="Fechar">✕</button>
     </header>
@@ -260,9 +275,22 @@ export function renderHelp() {
     </div>`;
 }
 
+/* Abre o procedimento; com `play`, já no tutorial em vídeo. */
+export function openHelp({ play = false } = {}) {
+  const modal = document.getElementById("help-modal");
+  if (!state.data) return;
+  renderHelp();
+  modal.showModal();
+  if (play) {
+    const player = document.getElementById("tutorial-player");
+    player.play().catch(() => { /* autoplay bloqueado: o player fica pronto para o clique */ });
+  }
+}
+
 export function bindHelp() {
   const modal = document.getElementById("help-modal");
-  const open = () => { renderHelp(); modal.showModal(); };
+  const open = () => openHelp();
+  modal.addEventListener("close", () => document.getElementById("tutorial-player")?.pause());
   document.getElementById("open-help").addEventListener("click", () => state.data && open());
   document.addEventListener("keydown", (e) => {
     if (e.key === "?" && state.data && !modal.open && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) open();

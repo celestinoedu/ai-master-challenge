@@ -2,6 +2,7 @@
 import { GLOSSARY, LANE, LANE_ORDER, NEGOTIATION_PHASES, PHASE, SECTORS, STAGE, info } from "./terms.js";
 import { compact, downloadCsv, esc, firstName, fmt, fmtDate, initials, median, readStore, writeStore } from "./format.js";
 import { doneFor, scopedItems, state, toggleDone } from "./state.js";
+import { openHelp } from "./help.js";
 
 const PAGE = 25;
 const GUIDE_KEY = "lead-kanban-guide-dismissed";
@@ -42,6 +43,7 @@ function renderGuide() {
     </div>
     <div class="guide-actions">
       <span>Clique em um cartão para ver o que fazer.</span>
+      <button type="button" class="ghost-btn" data-guide-video>▶ Assistir tutorial (2 min)</button>
       <button type="button" class="ghost-btn" data-guide-help>Ver regras completas</button>
       <button type="button" class="primary-btn" data-guide-close>Entendi</button>
     </div>`;
@@ -305,6 +307,7 @@ export function bindPipeline() {
   el.guide.addEventListener("click", (e) => {
     if (e.target.closest("[data-guide-close]")) { writeStore(GUIDE_KEY, true); el.guide.hidden = true; }
     if (e.target.closest("[data-guide-help]")) document.getElementById("open-help").click();
+    if (e.target.closest("[data-guide-video]")) openHelp({ play: true });
   });
   el.content.addEventListener("change", (e) => {
     const box = e.target.closest("[data-action]");
