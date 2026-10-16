@@ -24,6 +24,7 @@ from pathlib import Path
 import argparse
 import json
 import math
+import random
 
 from leadscore.data import ARCHIVE_NAME, Dataset, download_archive, load_dataset
 from leadscore.priority import LANES, PriorityItem, build_reference, score_opportunity
@@ -35,6 +36,7 @@ END_OF_DATA = date(2017, 12, 31)
 TOP_N = 5
 SELECTION_CUTOFFS = 3      # desempate comparado nos 3 primeiros cortes e, à parte, nos 2 últimos
 THRESHOLDS = (("max", None), ("p99", 0.99), ("p95", 0.95), ("p90", 0.90))
+BOOTSTRAP_REPS = 5000
 
 
 def previous_attention_score(dataset: Dataset, item: PriorityItem) -> int:
@@ -85,28 +87,62 @@ def quantile_days(dataset: Dataset, cutoff: date, share: float) -> int:
     return cycles[max(0, math.ceil(share * len(cycles)) - 1)]
 
 
+def picks(pairs, key):
+    """Top-N de um vendedor como (item, desfecho, peso); empates na vaga de corte dividem a vaga (como no G2)."""
+    groups = defaultdict(list)
+    for pair in pairs:
+        groups[key(pair)].append(pair)
+    remaining = TOP_N
+    for group_key in sorted(groups):
+        if remaining <= 0:
+            break
+        group = groups[group_key]
+        weight = min(1.0, remaining / len(group))
+        remaining -= len(group)
+        for item, real in group:
+            yield item, real, weight
+
+
+def won_revenue(real, weight: float) -> float:
+    return weight * float(real.close_value) if real.deal_stage == "Won" else 0.0
+
+
 def top(by_agent, key) -> dict:
-    """Top-N por vendedor; empates na vaga de corte dividem a vaga proporcionalmente (como no G2)."""
+    """Totais do top-N por vendedor."""
     totals = defaultdict(float)
     for pairs in by_agent.values():
-        groups = defaultdict(list)
-        for pair in pairs:
-            groups[key(pair)].append(pair)
-        remaining = TOP_N
-        for group_key in sorted(groups):
-            if remaining <= 0:
-                break
-            group = groups[group_key]
-            weight = min(1.0, remaining / len(group))
-            remaining -= len(group)
-            for item, real in group:
-                totals["slots"] += weight
-                totals[outcome(real) if outcome(real) != "open" else "still_open"] += weight
-                totals["beyond_cycle_slots"] += weight * (item.lane == "encerrar")
-                if real.deal_stage == "Won":
-                    totals["won_revenue"] += weight * float(real.close_value)
+        for item, real, weight in picks(pairs, key):
+            totals["slots"] += weight
+            totals[outcome(real) if outcome(real) != "open" else "still_open"] += weight
+            totals["beyond_cycle_slots"] += weight * (item.lane == "encerrar")
+            totals["won_revenue"] += won_revenue(real, weight)
     return {name: round(totals[name], 2) for name in
             ("slots", "won", "lost", "still_open", "won_revenue", "beyond_cycle_slots")}
+
+
+def revenue_by_agent(by_agent, key) -> dict[str, float]:
+    """Receita ganha no top-N de cada vendedor: a unidade do bootstrap."""
+    return {agent: sum(won_revenue(real, weight) for _, real, weight in picks(pairs, key))
+            for agent, pairs in by_agent.items()}
+
+
+def bootstrap(units: list[tuple[float, float]], reps: int = BOOTSTRAP_REPS, seed: int = 2017) -> dict:
+    """Bootstrap pareado sobre pares (vendedor, data): ganho relativo de A sobre B, com IC de 95%."""
+    rng = random.Random(seed)
+    total_a, total_b = sum(a for a, _ in units), sum(b for _, b in units)
+    lifts = []
+    for _ in range(reps):
+        sample = [units[rng.randrange(len(units))] for _ in units]
+        sa, sb = sum(a for a, _ in sample), sum(b for _, b in sample)
+        lifts.append(sa / sb - 1 if sb else 0.0)
+    lifts.sort()
+    return {
+        "units": len(units), "reps": reps,
+        "revenue_a": round(total_a, 2), "revenue_b": round(total_b, 2),
+        "lift": round(total_a / total_b - 1, 4),
+        "ci95": [round(lifts[int(0.025 * reps)], 4), round(lifts[int(0.975 * reps) - 1], 4)],
+        "share_reps_a_better": round(sum(l > 0 for l in lifts) / reps, 4),
+    }
 
 
 LANE_RANK = {lane: index for index, lane in enumerate(LANES)}
@@ -184,9 +220,6 @@ def evaluate_cutoff(dataset: Dataset, cutoff: date) -> dict:
         item = pair[0]
         return (-previous_attention_score(dataset, item), -item.catalog_price)
 
-    def price_only(pair):
-        return (-pair[0].catalog_price,)
-
     def expected_value(pair):
         item = pair[0]
         if item.lane != "negociar":
@@ -206,9 +239,36 @@ def evaluate_cutoff(dataset: Dataset, cutoff: date) -> dict:
             "price_only_no_lanes": top(by_agent, price_only),
             "lanes_expected_value_rejected": top(by_agent, expected_value),
             "focus_rule": top(by_agent, focus_rule),
+            # Decomposição: de onde vem a diferença para "só valor"?
+            "price_recency_no_lanes": top(by_agent, price_recency),
+            "lanes_price_no_recency": top(by_agent, lanes_price),
         },
         "robustness": robustness(dataset, cutoff, reference, by_agent),
+        "_per_agent": {name: revenue_by_agent(by_agent, key) for name, key in DECOMPOSITION.items()},
     }
+
+
+# Chaves sem ID: empates na vaga de corte dividem a vaga proporcionalmente.
+def price_only(pair):
+    return (-pair[0].catalog_price,)
+
+
+def price_recency(pair):
+    """Só valor e, no empate, o negócio mais novo; sem colunas (parados podem entrar)."""
+    return (-pair[0].catalog_price, pair[0].days_in_engaging)
+
+
+def lanes_price(pair):
+    """Colunas e valor, sem desempate por idade: isola o efeito de tirar os parados."""
+    return (LANE_RANK[pair[0].lane], -pair[0].catalog_price)
+
+
+DECOMPOSITION = {
+    "price_only_no_lanes": price_only,
+    "lanes_price_no_recency": lanes_price,
+    "price_recency_no_lanes": price_recency,
+    "focus_rule": focus_rule,
+}
 
 
 def summarize(cutoffs: list[dict]) -> dict:
@@ -239,6 +299,24 @@ def summarize(cutoffs: list[dict]) -> dict:
     }
 
 
+def decompose(cutoffs: list[dict], per_agent: list[dict]) -> dict:
+    """Totais das variantes da decomposição e bootstrap pareado da regra contra cada uma."""
+    totals = {}
+    for name in DECOMPOSITION:
+        rows = [c[f"top{TOP_N}_per_agent"][name] for c in cutoffs]
+        totals[name] = {field: round(sum(r[field] for r in rows), 2)
+                        for field in ("won", "won_revenue", "beyond_cycle_slots")}
+
+    def units(a: str, b: str) -> list[tuple[float, float]]:
+        return [(p[a][agent], p[b][agent]) for p in per_agent for agent in p[a]]
+
+    return {
+        "totals": totals,
+        "bootstrap": {f"focus_rule_vs_{other}": bootstrap(units("focus_rule", other))
+                      for other in DECOMPOSITION if other != "focus_rule"},
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--output", type=Path)
@@ -246,9 +324,11 @@ def main() -> None:
     root = Path(__file__).resolve().parent
     dataset = load_dataset(download_archive(root / "data" / ARCHIVE_NAME))
     cutoffs = [evaluate_cutoff(dataset, cutoff) for cutoff in CUTOFFS]
+    per_agent = [c.pop("_per_agent") for c in cutoffs]
     result = {
         "note": "Exploratório. Outcomes observados até 31/12/2017; Prospecting excluído por falta de datas.",
         "robustness_summary": summarize(cutoffs),
+        "decomposition": decompose(cutoffs, per_agent),
         "cutoffs": cutoffs,
     }
     text = json.dumps(result, ensure_ascii=False, indent=2) + "\n"

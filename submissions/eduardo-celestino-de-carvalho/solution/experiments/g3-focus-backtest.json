@@ -70,6 +70,68 @@
       }
     }
   },
+  "decomposition": {
+    "totals": {
+      "price_only_no_lanes": {
+        "won": 275.27,
+        "won_revenue": 1762977.47,
+        "beyond_cycle_slots": 91.39
+      },
+      "lanes_price_no_recency": {
+        "won": 298.78,
+        "won_revenue": 1896395.79,
+        "beyond_cycle_slots": 0.0
+      },
+      "price_recency_no_lanes": {
+        "won": 319.83,
+        "won_revenue": 2062885.67,
+        "beyond_cycle_slots": 31.0
+      },
+      "focus_rule": {
+        "won": 326.33,
+        "won_revenue": 2089794.67,
+        "beyond_cycle_slots": 0.0
+      }
+    },
+    "bootstrap": {
+      "focus_rule_vs_price_only_no_lanes": {
+        "units": 150,
+        "reps": 5000,
+        "revenue_a": 2089794.67,
+        "revenue_b": 1762977.48,
+        "lift": 0.1854,
+        "ci95": [
+          0.1241,
+          0.2536
+        ],
+        "share_reps_a_better": 1.0
+      },
+      "focus_rule_vs_lanes_price_no_recency": {
+        "units": 150,
+        "reps": 5000,
+        "revenue_a": 2089794.67,
+        "revenue_b": 1896395.78,
+        "lift": 0.102,
+        "ci95": [
+          0.0552,
+          0.1539
+        ],
+        "share_reps_a_better": 1.0
+      },
+      "focus_rule_vs_price_recency_no_lanes": {
+        "units": 150,
+        "reps": 5000,
+        "revenue_a": 2089794.67,
+        "revenue_b": 2062885.67,
+        "lift": 0.013,
+        "ci95": [
+          0.004,
+          0.0247
+        ],
+        "share_reps_a_better": 0.9994
+      }
+    }
+  },
   "cutoffs": [
     {
       "cutoff": "2017-05-31",
@@ -149,6 +211,22 @@
           "lost": 31.17,
           "still_open": 46.0,
           "won_revenue": 526250.67,
+          "beyond_cycle_slots": 0.0
+        },
+        "price_recency_no_lanes": {
+          "slots": 150.0,
+          "won": 71.83,
+          "lost": 31.17,
+          "still_open": 47.0,
+          "won_revenue": 521494.67,
+          "beyond_cycle_slots": 2.0
+        },
+        "lanes_price_no_recency": {
+          "slots": 150.0,
+          "won": 74.6,
+          "lost": 27.45,
+          "still_open": 47.94,
+          "won_revenue": 520652.63,
           "beyond_cycle_slots": 0.0
         }
       },
@@ -310,6 +388,22 @@
           "still_open": 36.0,
           "won_revenue": 466947.0,
           "beyond_cycle_slots": 0.0
+        },
+        "price_recency_no_lanes": {
+          "slots": 150.0,
+          "won": 74.0,
+          "lost": 38.0,
+          "still_open": 38.0,
+          "won_revenue": 466947.0,
+          "beyond_cycle_slots": 5.0
+        },
+        "lanes_price_no_recency": {
+          "slots": 150.0,
+          "won": 65.03,
+          "lost": 34.3,
+          "still_open": 50.67,
+          "won_revenue": 404445.29,
+          "beyond_cycle_slots": 0.0
         }
       },
       "robustness": {
@@ -469,6 +563,22 @@
           "lost": 25.0,
           "still_open": 61.0,
           "won_revenue": 426524.0,
+          "beyond_cycle_slots": 0.0
+        },
+        "price_recency_no_lanes": {
+          "slots": 150.0,
+          "won": 62.0,
+          "lost": 23.0,
+          "still_open": 65.0,
+          "won_revenue": 419626.0,
+          "beyond_cycle_slots": 6.0
+        },
+        "lanes_price_no_recency": {
+          "slots": 150.0,
+          "won": 61.46,
+          "lost": 26.23,
+          "still_open": 62.31,
+          "won_revenue": 401866.45,
           "beyond_cycle_slots": 0.0
         }
       },
@@ -630,6 +740,22 @@
           "still_open": 63.5,
           "won_revenue": 334887.0,
           "beyond_cycle_slots": 0.0
+        },
+        "price_recency_no_lanes": {
+          "slots": 150.0,
+          "won": 56.0,
+          "lost": 27.0,
+          "still_open": 67.0,
+          "won_revenue": 329416.0,
+          "beyond_cycle_slots": 8.0
+        },
+        "lanes_price_no_recency": {
+          "slots": 150.0,
+          "won": 53.07,
+          "lost": 21.06,
+          "still_open": 75.87,
+          "won_revenue": 304694.78,
+          "beyond_cycle_slots": 0.0
         }
       },
       "robustness": {
@@ -789,6 +915,22 @@
           "lost": 42.0,
           "still_open": 50.0,
           "won_revenue": 335186.0,
+          "beyond_cycle_slots": 0.0
+        },
+        "price_recency_no_lanes": {
+          "slots": 150.0,
+          "won": 56.0,
+          "lost": 39.0,
+          "still_open": 55.0,
+          "won_revenue": 325402.0,
+          "beyond_cycle_slots": 10.0
+        },
+        "lanes_price_no_recency": {
+          "slots": 150.0,
+          "won": 44.62,
+          "lost": 34.26,
+          "still_open": 71.11,
+          "won_revenue": 264736.64,
           "beyond_cycle_slots": 0.0
         }
       },
