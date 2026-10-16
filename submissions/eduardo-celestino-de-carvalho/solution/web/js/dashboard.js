@@ -215,16 +215,21 @@ function evidence() {
        <div class="mini-caption">dias em negociação</div>`,
       "Por isso, no empate de valor, <b>o negócio mais recente vem primeiro</b>.");
 
-    // Comparação com o método óbvio: ordenar só pelo valor, sem separar os parados.
+    // Comparação com o método óbvio (só valor) e o passo intermediário: tirar os parados sem olhar a idade.
     const total = (key, field) => backtest.reduce((acc, c) => acc + (c.top5[key]?.[field] || 0), 0);
     const current = total("focus_rule", "won_revenue"), byValue = total("price_only_no_lanes", "won_revenue");
-    const picks = total("focus_rule", "slots");
-    fact4 = fact(4, `+${pct(current - byValue, byValue)}`, "de receita em relação a ordenar só pelo valor, num teste com dados passados.",
+    const noStale = total("lanes_price_no_recency", "won_revenue");
+    const ci = state.data.decomposition?.bootstrap?.focus_rule_vs_price_only_no_lanes?.ci95;
+    const margin = ci ? ` Margem provável: de +${Math.round(ci[0] * 100)}% a +${Math.round(ci[1] * 100)}%.` : "";
+    const bar = (label, value, color) =>
+      `<div><span>${label}</span><span class="compare-bar"><span style="width:${(value / current) * 100}%;background:${color}"></span></span><b>${compact(value)}</b></div>`;
+    fact4 = fact(4, `+${pct(current - byValue, byValue)}`, `de receita em relação a ordenar só pelo valor, num teste com dados passados.${margin}`,
       `<div class="compare">
-         <div><span>Só pelo valor</span><span class="compare-bar"><span style="width:${(byValue / current) * 100}%;background:${GRAY}"></span></span><b>${compact(byValue)}</b></div>
-         <div><span>Lead Kanban</span><span class="compare-bar"><span style="width:100%;background:${LANE.negociar.color}"></span></span><b>${compact(current)}</b></div>
+         ${bar("Só pelo valor", byValue, GRAY)}
+         ${noStale ? bar("Sem os parados", noStale, "#8fb3d4") : ""}
+         ${bar("Lead Kanban", current, LANE.negociar.color)}
        </div>`,
-      `Porque não perde tempo com parados: <b>${fmt(total("focus_rule", "beyond_cycle_slots"))}</b> de ${fmt(picks)} escolhas, contra <b>${fmt(total("price_only_no_lanes", "beyond_cycle_slots"))}</b>.`);
+      "Vem da idade do negócio: <b>tirar os parados</b> da fila e, no empate de valor, <b>começar pelo mais novo</b>.");
   }
 
   return `

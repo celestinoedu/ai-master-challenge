@@ -19,8 +19,11 @@ const SECTIONS = [
   ["limites", "Limites"],
 ];
 // Comparação com o método óbvio do desafio: ordenar só pelo valor.
+// Os dois passos intermediários mostram de onde vem a diferença.
 const VARIANTS = [
   ["price_only_no_lanes", "Ordenar só pelo valor potencial"],
+  ["lanes_price_no_recency", "Valor, sem os parados (sem olhar a idade)"],
+  ["price_recency_no_lanes", "Valor e mais novo primeiro, com os parados"],
   ["focus_rule", "Lead Kanban"],
 ];
 
@@ -200,6 +203,7 @@ function evidence() {
           <tbody>${totals.map((t) => `<tr class="${t.key === "focus_rule" ? "is-current" : ""}"><th scope="row">${t.label}</th><td class="num">${fmt(t.won)}</td><td class="num">${compact(t.revenue)}</td><td class="num">${fmt(t.beyond)}</td></tr>`).join("")}</tbody>
         </table>
       </div>
+      ${origin(totals)}
       <p>Dos ${fmt(exceeded)} casos que já tinham prazo excedido nas datas de teste, <strong>${fmt(closedLater)} fecharam depois</strong>.</p>
       ${robustness()}`;
   }
@@ -209,6 +213,25 @@ function evidence() {
       <li>O tempo diferencia: perdas se decidem cedo (mediana de ${reference.medianLost} dias) e ganhos levam mais (mediana de ${reference.medianWon}). Nenhum negócio fechou depois de ${reference.maxCycle} dias.</li>
     </ul>
     ${table}`;
+}
+
+/* De onde vem a diferença para "só valor": os dois usos da idade, com a margem do bootstrap. */
+function origin(totals) {
+  const by = Object.fromEntries(totals.map((t) => [t.key, t.revenue]));
+  const base = by.price_only_no_lanes, noStale = by.lanes_price_no_recency, rule = by.focus_rule;
+  if (!base || !noStale || !rule) return "";
+  const share = Math.round(((noStale - base) / (rule - base)) * 10);
+  const boot = state.data.decomposition?.bootstrap ?? {};
+  const vsValue = boot.focus_rule_vs_price_only_no_lanes, vsRecency = boot.focus_rule_vs_price_recency_no_lanes;
+  // Margens pequenas com uma casa decimal: "+0%" esconderia que o intervalo é positivo.
+  const p = (x) => (x * 100).toLocaleString("pt-BR", { maximumFractionDigits: Math.abs(x) < 0.05 ? 1 : 0 });
+  const range = (b) => `de +${p(b.ci95[0])}% a +${p(b.ci95[1])}%`;
+  return `
+    <ul class="checks">
+      <li><strong>A diferença vem da idade do negócio.</strong> Tirar os parados da fila explica cerca de ${share} em cada 10 reais a mais; no empate de valor, começar pelo mais novo explica os outros ${10 - share}.</li>
+      ${vsValue ? `<li>Margem provável do ganho sobre "só valor": <strong>${range(vsValue)}</strong> (reamostragem de ${fmt(vsValue.units)} pares vendedor × data, ${fmt(vsValue.reps)} vezes).</li>` : ""}
+      ${vsRecency ? `<li>Ordenar por valor e idade sem as colunas chega perto (${range(vsRecency)} a favor do Lead Kanban), mas ainda põe negócios parados entre os 5 primeiros. As colunas tiram os parados da agenda e dizem o que fazer com eles.</li>` : ""}
+    </ul>`;
 }
 
 /* Controles de robustez do teste: desempate validado fora da seleção e prazos menores. */
