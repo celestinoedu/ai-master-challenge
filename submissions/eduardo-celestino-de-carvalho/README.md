@@ -129,13 +129,17 @@ Na primeira execução, o dataset público é baixado do Kaggle e verificado. Te
   - o navegador servia versões antigas da página.
 
   Todos foram encontrados na revisão em navegador e corrigidos.
+- **Exagero no texto:** a IA chamou de "validação fora da amostra" uma separação de datas que já tinham sido vistas. Na revisão, o termo virou "conferência por partes", e o JSON foi renomeado para não prometer o que o teste não mostra.
+- **Export das conversas:** a primeira versão da redação deixou passar variações em maiúsculas de nomes privados e não trazia as mensagens enviadas durante a execução. A busca no texto final apontou as duas falhas, e o export foi refeito.
 
 ### O que eu adicionei que a IA sozinha não faria
 
+- **Propus a hipótese preditiva**, a partir dos negócios ganhos e perdidos, e aceitei o resultado negativo do teste em vez de forçar um score de probabilidade.
 - **Pedi a crítica da própria solução** quando ela já "funcionava". Foi isso que revelou que a primeira regra priorizava negócios parados.
 - **Defini o critério de UX:** qualquer pessoa deve entender os indicadores sem conhecer a área. Isso levou a menos texto, verbos de ação nas colunas e gráficos com uma frase de conclusão.
 - **Cortei o que não servia ao avaliador**, como a comparação com a minha regra anterior no Dashboard.
 - **Decidi nome, identidade visual e escopo do Dashboard gerencial:** onde está o valor e quem cobrar.
+- **Comparei a entrega com as outras submissões do case.** Ao ver que o insight dos 138 dias era comum, priorizei o que diferencia: transparência total do processo (exports das conversas) e material de apoio para quem não é da área (o vídeo tutorial, no padrão de vídeos que já produzo).
 
 ---
 
